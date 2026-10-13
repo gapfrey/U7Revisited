@@ -2,7 +2,6 @@
 function npc_erethian_transform_0406(objectref)
     local var_0000, var_0001, var_0002, var_0003, var_0004, var_0005, var_0006, var_0007, var_0008, var_0009, var_000A, var_000B, var_000C, var_000D, var_000E
 
-    start_conversation()
     var_0000 = false
     var_0001 = false
     var_0002 = false
@@ -11,10 +10,14 @@ function npc_erethian_transform_0406(objectref)
     var_0005 = false
     var_0006 = get_object_position(objectref) --- Guess: Gets position data
     set_schedule_type(15, objectref) --- Guess: Sets object behavior
-    if not get_flag(3) then
+    -- Flag 3 selects the successful gargoyle/dragon sequence; otherwise the
+    -- damaged ether turns the same attempts into the rodent/cow sequence.
+    -- Flags 811 and 812 advance each sequence across repeated questions.
+    -- U7R currently checks the target tile, not the replacement shape's full footprint; exact original clearance may require engine support.
+    if get_flag(3) then
         if not get_flag(811) then
             var_0007 = set_last_created(objectref) --- Guess: Checks position
-            if not spawn_object_at(504, 286, var_0006) then --- Guess: Spawns item at position
+            if not is_not_blocked(-359, 504, var_0006) then
                 var_0004 = true
                 var_0007 = update_last_created(var_0006) --- Guess: Updates position
             else
@@ -44,7 +47,7 @@ function npc_erethian_transform_0406(objectref)
         switch_talk_to(286, 1) --- Guess: Initiates dialogue
         if not get_flag(811) then
             var_0007 = set_last_created(objectref) --- Guess: Checks position
-            if not spawn_object_at(500, 0, var_0006) then --- Guess: Spawns item at position
+            if not is_not_blocked(0, 500, var_0006) then
                 var_0004 = true
                 var_0007 = update_last_created(var_0006) --- Guess: Updates position
             else
@@ -71,24 +74,39 @@ function npc_erethian_transform_0406(objectref)
             var_000A = add_containerobject_s(356, {1693, 8021, 12, 7719})
         end
     end
+    -- U7R's UC_USECODE currently reads function IDs 1687/1688 but discards them and calls Interact(2) on the target object.
+    -- The faithful fix is to dispatch the requested usecode function in the engine; these direct Lua calls are a synchronous fallback.
+    -- Each branch first queues the original animation array, then advances the
+    -- temporary form immediately through the translated fn_0697 callback.
     if var_0000 then
-        var_000B = add_containerobject_s(objectref, {1687, 8021, 3, 17447, 8045, 1, 17447, 8044, 1, 17447, 8033, 1, 17447, 8047, 1, 17447, 8048, 1, 7975, 4, 7769})
+        var_000B = add_containerobject_s(objectref, {3, 17447, 8045, 1, 17447, 8044, 1, 17447, 8033, 1, 17447, 8047, 1, 17447, 8048, 1, 7975, 4, 7769})
+        utility_erethian_transform_0407(2, objectref)
     end
     if var_0001 then
-        var_0000 = set_object_type_at(274, objectref, 1) --- Guess: Sets item type at position
-        var_000C = add_containerobject_s(var_0000, {1687, 8021, 2, 17447, 8045, 3, 17447, 8044, 6, 7719})
+        var_0000 = find_nearest(objectref, 274, 1)
+        if var_0000 then
+            var_000C = add_containerobject_s(var_0000, {2, 17447, 8045, 3, 17447, 8044, 6, 7719})
+            utility_erethian_transform_0407(2, var_0000)
+        end
     end
     if var_0002 then
-        var_000B = add_containerobject_s(objectref, {1687, 8021, 3, 17447, 8045, 1, 17447, 8044, 1, 17447, 8048, 1, 17447, 8047, 1, 7975, 4, 7769})
+        var_000B = add_containerobject_s(objectref, {3, 17447, 8045, 1, 17447, 8044, 1, 17447, 8048, 1, 17447, 8047, 1, 7975, 4, 7769})
+        utility_erethian_transform_0407(2, objectref)
     end
     if var_0003 then
-        var_000B = add_containerobject_s(objectref, {1687, 8021, 1, 17447, 8047, 1, 17447, 8048, 1, 17447, 8044, 3, 17447, 8045, 1, 17447, 8044, 1, 7975, 4, 7769})
+        var_000B = add_containerobject_s(objectref, {1, 17447, 8047, 1, 17447, 8048, 1, 17447, 8044, 3, 17447, 8045, 1, 17447, 8044, 1, 7975, 4, 7769})
+        utility_erethian_transform_0407(2, objectref)
     end
     if var_0005 then
-        var_0001 = set_object_type_at(504, objectref, 1) --- Guess: Sets item type at position
-        var_000D = add_containerobject_s(var_0001, {1687, 8021, 1, 17447, 8042, 2, 17447, 8041, 1, 17447, 8040, 1, 17447, 8042, 2, 17447, 8040, 3, 7719})
+        var_0001 = find_nearest(objectref, 504, 1)
+        if var_0001 then
+            var_000D = add_containerobject_s(var_0001, {1, 17447, 8042, 2, 17447, 8041, 1, 17447, 8040, 1, 17447, 8042, 2, 17447, 8040, 3, 7719})
+            utility_erethian_transform_0407(2, var_0001)
+        end
     end
     if var_0004 then
+        -- A blocked replacement footprint produces the confined-quarters
+        -- response instead of creating any temporary transformation object.
         switch_talk_to(286, 1) --- Guess: Initiates dialogue
         if not get_flag(810) then
             add_dialogue("The old mage seems on the verge of saying something, stops then says, \"Were quarter's not so confined here, I'd show thee that my blindness in no way hampers my abilities.\" His affliction seems to be a touchy subject with the mage.*")

@@ -1,31 +1,38 @@
 --- Best guess: Manages a dungeon forge egg, spawning mages, dragons, or golems based on item quality and container contents, with specific flag checks.
+--- Quality 1 now finds or creates the shape 154 mage and stores scroll 797 (quality 240, frame 4) on him. That scroll marks him as Erethian.
 function utility_forge_0419(eventid, objectref)
     local var_0000, var_0001, var_0002, var_0003, var_0004, var_0005, var_0006, var_0007, var_0008, var_0009, var_000A, var_000B, var_000C, var_000D, var_000E, var_000F, var_0010, var_0011, var_0012, var_0013, var_0014, var_0015, var_0016, var_0017, var_0018, var_0019, var_001A, var_001B, var_001C, var_001D, var_001E
 
     if eventid ~= 3 then
         return
     end
+    -- This shared Forge egg dispatches by quality. Qualities 1 and 2 restore
+    -- the marked mages; later qualities create quest creatures and markers.
     var_0000 = get_object_quality(objectref)
     if var_0000 == 1 and not get_flag(750) then
         var_0001 = false
-        var_0002 = find_nearby(8, 80, 154, objectref)
-        for i = 1, 5 do
-            if get_cont_items(4, 240, 797, var_0005) then
-                var_0001 = var_0005
-                break
+        var_0002 = find_nearby(objectref, 154, 80, 8)
+        -- Check each nearby mage; the old decompile tested the unset var_0005.
+        if var_0002 then
+            for _, mage in ipairs(var_0002) do
+                if get_cont_items(mage, 797, 240, 4) then
+                    var_0001 = mage
+                    break
+                end
             end
         end
         if not var_0001 then
-            var_0006 = find_nearest(1, 154, objectref)
+            var_0006 = find_nearest(objectref, 154, 1)
             if not var_0006 then
-                if not is_not_blocked(16, 154, get_object_position(objectref)) then
-                    utility_position_1003(16, 154, objectref)
+                -- The translated fn_08EB/position helper path aborted before
+                -- creating anything in U7R, so create its shape 154 mage here.
+                local pos = get_object_position(objectref)
+                var_0006 = create_new_object(154)
+                if var_0006 and pos then
+                    update_last_created(pos)
                 end
-                var_0007 = get_object_position(objectref)[-359][0]
-                var_0008 = find_nearby(16, 0, 275, var_0007)
-                var_0009 = execute_usecode_array(8520, var_0008)
-                var_0009 = execute_usecode_array(1699, {17493, 7724}, objectref)
-            else
+            end
+            if var_0006 then
                 var_000A = die_roll(6, 1)
                 if var_000A == 1 then
                     set_schedule_type(14, var_0006)
@@ -38,7 +45,8 @@ function utility_forge_0419(eventid, objectref)
                 set_item_flag(18, var_000B)
                 var_0009 = set_object_quality(240, var_000B)
                 set_object_frame(4, var_000B)
-                var_0009 = give_last_created(var_0006)
+                -- This mage is a plain shape, and this call stores the scroll on him.
+                var_0009 = move_object_to_container(var_000B, var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_000B)
             end
         end

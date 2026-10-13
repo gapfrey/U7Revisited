@@ -1944,17 +1944,19 @@ void U7Object::HandleUsecodeEgg()
 	if (justTriggered)
 	{
 		// Egg usecode funcs are stored as 0x500+N (1280+N). Scripts are named
-		// utility_event_0NNN.lua or utility_unknown_0NNN.lua (decompiler split).
+		// utility_forge_0NNN.lua, utility_unknown_0NNN.lua, or utility_event_0NNN.lua.
 		int scriptnumber = m_eggData.m_usecodeFunc;
 		if (scriptnumber >= 1280)
 			scriptnumber -= 1280;
 
 		char numBuf[16];
 		snprintf(numBuf, sizeof(numBuf), "%04d", scriptnumber);
-		// Decompiler split egg scripts across several prefixes.
+		// The decompiler split egg scripts across several prefixes. Prefer the
+		// specific Forge name so a generic utility_event fallback cannot shadow it.
 		const std::string candidates[] = {
-			std::string("utility_event_") + numBuf,
+			std::string("utility_forge_") + numBuf,
 			std::string("utility_unknown_") + numBuf,
+			std::string("utility_event_") + numBuf,
 			std::string("utility_clock_") + numBuf,
 			std::string("utility_ship_") + numBuf,
 		};
@@ -2082,6 +2084,7 @@ void U7Object::DebugPrintEggInfo() const
 				int scriptNum = egg.m_usecodeFunc >= 1280 ? egg.m_usecodeFunc - 1280 : egg.m_usecodeFunc;
 				std::stringstream scriptSS;
 				scriptSS << "utility_event_" << std::setfill('0') << std::setw(4) << scriptNum
+					<< " / utility_forge_" << std::setfill('0') << std::setw(4) << scriptNum
 					<< " / utility_unknown_" << std::setfill('0') << std::setw(4) << scriptNum;
 				AddConsoleString("  Script: " + scriptSS.str());
 			}
