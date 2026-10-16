@@ -1,17 +1,13 @@
+-- Event 0 + chair 873: one bark per contiguous visit (within 1 tile), not once per save.
+local famished_chair_visit = {}
+
 --- Best guess: Manages Erethian's dialogue on the Island of Fire, covering his studies, the Dark Core, Arcadion, and the Talisman of Infinity, with topic selection and flag-based progression.
 function npc_erethian_island_fire_0154(eventid, objectref)
-    -- Shape 154 is a generic mage. Scroll 797, quality 240, frame 4 is the
-    -- inventory marker that isolates Erethian from every other mage.
-    if not get_cont_items(objectref, 797, 240, 4) then
-        return
-    end
-    if eventid == 1 then
-        eventid = 2
-    end
     local var_0000, var_0001, var_0002, var_0003, var_0004, var_0005, var_0006, var_0007, var_0008, var_0009, var_0010, var_0011, var_0012, var_0013, var_0014, var_0015, var_0016, var_0017, var_0018, var_0019
 
-    -- Event 0 is the original ambient/schedule callback: complain about or
-    -- extinguish candles, notice food and doors, or react to nearby walls.
+    -- Original usecode runs proximity (event 0) before the identifying-scroll
+    -- check. Engine Interact(0) only reaches this object after set_schedule_type
+    -- arms it, so other shape-154 mages do not blow candles.
     if eventid == 0 then
         var_0000 = find_nearest(objectref, 336, 1)
         var_0001 = find_nearest(objectref, 338, 1)
@@ -29,7 +25,8 @@ function npc_erethian_island_fire_0154(eventid, objectref)
                 for _, var_0007 in ipairs(var_0004) do
                     var_0008 = get_object_position(var_0007)
                     remove_item(var_0007)
-                    sprite_effect(-1, 0, 0, 0, var_0008[2] - 1, var_0008[1] - 1, 5)
+                    -- Horizontal XZ is [1] and [3]; [2] is height (same axes as 0407/0408).
+                    sprite_effect(-1, 0, 0, 0, var_0008[3] - 1, var_0008[1] - 1, 5, var_0008[2])
                 end
                 play_sound_effect(8)
                 delayed_execute_usecode_array(objectref, {17447, 8048, 3, 7463, "@An Ailem!", 17490, 7937, 1, 17447, 7791})
@@ -38,10 +35,17 @@ function npc_erethian_island_fire_0154(eventid, objectref)
             return
         end
 
+        -- 873 is a chair. Original said this when event 0 ran within 1 tile,
+        -- then went quiet because it did not poll while sitting. U7R polls
+        -- every 8-12s, so latch until he leaves that tile.
         if find_nearest(objectref, 873, 1) then
-            item_say("@I'm famished!@", objectref)
+            if not famished_chair_visit[objectref] then
+                item_say("@I'm famished!@", objectref)
+                famished_chair_visit[objectref] = true
+            end
             return
         end
+        famished_chair_visit[objectref] = nil
 
         var_0009 = find_nearest(objectref, 432, 2)
         var_0010 = find_nearest(objectref, 433, 2)
@@ -54,7 +58,7 @@ function npc_erethian_island_fire_0154(eventid, objectref)
             return
         end
 
-        var_0011 = find_nearby(objectref, 607, 16, 0)
+        var_0011 = find_nearby(objectref, 607, 0, 0)
         for _, var_0014 in ipairs(var_0011) do
             if get_object_frame(var_0014) == 4 and get_object_frame(objectref) >= 16 then
                 item_say("@Ah, a wall.@", objectref)
@@ -64,16 +68,32 @@ function npc_erethian_island_fire_0154(eventid, objectref)
             end
             return
         end
-    elseif eventid == 1 then
-        -- Preserve the original schedule branch that turns Erethian around;
-        -- U7R's direct interaction event is remapped to event 2 above.
-        if not utility_find_items_frames_18_21_0897() then
-            var_0012 = utility_direction_to_target_1069(objectref)
-            var_0013 = (var_0012 + 4) % 8
-            execute_usecode_array(0, 154, 8533, var_0013, 17497, 7777)
-        else
+        return
+    end
+
+    -- Shape 154 is a generic mage. Scroll 797, quality 240, frame 4 is the
+    -- inventory marker that isolates Erethian from every other mage.
+    if not get_cont_items(objectref, 797, 240, 4) then
+        return
+    end
+
+    if eventid == 1 then
+        -- Original DOUBLECLICK: abort if the Avatar statue overlay is present,
+        -- otherwise turn, then run this same function as event 2.
+        -- Do not dispatch function 154: that suffix collides with npc_grod_0154.
+        if utility_find_items_frames_18_21_0897() then
             return
         end
+        -- Double-click when in bed: stand up and loiter now. Sitting stays seated when double-clicked.
+        if is_sleeping and is_sleeping(objectref) then
+            npc_frame(objectref, 0)
+            set_schedule_type(objectref, 11)
+        end
+        var_0012 = utility_direction_to_target_1069(objectref)
+        var_0013 = (var_0012 + 4) % 8
+        execute_usecode_array(0, 154, 8533, var_0013, 17497, 7777)
+        npc_erethian_island_fire_0154(2, objectref)
+        return
     elseif eventid == 2 then
         -- Event 2 owns the complete conversation. Topic availability mirrors
         -- the original quest flags and is rebuilt on every interaction.

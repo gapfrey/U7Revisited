@@ -33,18 +33,22 @@ function utility_forge_0419(eventid, objectref)
                 end
             end
             if var_0006 then
-                var_000A = die_roll(6, 1)
+                -- Original Func06A3: UI_set_schedule_type(mage, sleep/loiter/sit).
+                -- Do not reverse args; first is the world object, not NPC 11/14/16.
+                -- C++ die_roll is (num_dice, num_sides); decompiler emitted (6, 1) = 6d1.
+                var_000A = die_roll(1, 6)
                 if var_000A == 1 then
-                    set_schedule_type(14, var_0006)
+                    set_schedule_type(var_0006, 14)
                 elseif var_000A >= 2 and var_000A <= 4 then
-                    set_schedule_type(11, var_0006)
+                    set_schedule_type(var_0006, 11)
                 elseif var_000A >= 5 then
-                    set_schedule_type(16, var_0006)
+                    set_schedule_type(var_0006, 16)
                 end
                 var_000B = create_new_object(797)
-                set_item_flag(18, var_000B)
-                var_0009 = set_object_quality(240, var_000B)
-                set_object_frame(4, var_000B)
+                -- C++ setters are (object, value); decompiler emitted (value, object).
+                set_item_flag(var_000B, 18)
+                var_0009 = set_object_quality(var_000B, 240)
+                set_object_frame(var_000B, 4)
                 -- This mage is a plain shape, and this call stores the scroll on him.
                 var_0009 = move_object_to_container(var_000B, var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_000B)
@@ -70,13 +74,13 @@ function utility_forge_0419(eventid, objectref)
                 var_0009 = execute_usecode_array(8520, var_0008)
                 var_0009 = execute_usecode_array(1699, {17493, 7724}, objectref)
             else
-                set_schedule_type(15, var_0006)
-                set_object_frame(19, var_0006)
-                set_item_flag(18, var_0006)
+                set_schedule_type(var_0006, 15)
+                set_object_frame(var_0006, 19)
+                set_item_flag(var_0006, 18)
                 var_000F = create_new_object(797)
-                set_item_flag(18, var_000F)
-                var_0009 = set_object_quality(241, var_000F)
-                set_object_frame(4, var_000F)
+                set_item_flag(var_000F, 18)
+                var_0009 = set_object_quality(var_000F, 241)
+                set_object_frame(var_000F, 4)
                 var_0009 = give_last_created(var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_000F)
             end
@@ -101,11 +105,11 @@ function utility_forge_0419(eventid, objectref)
                 var_0009 = execute_usecode_array(8520, var_0008)
                 var_0009 = execute_usecode_array(1699, {17493, 7724}, objectref)
             else
-                set_object_frame(16, var_0006)
+                set_object_frame(var_0006, 16)
                 if not get_flag(795) or not get_flag(796) or not get_flag(806) then
-                    set_schedule_type(11, var_0006)
+                    set_schedule_type(var_0006, 11)
                 else
-                    set_schedule_type(15, var_0006)
+                    set_schedule_type(var_0006, 15)
                 end
                 var_0009 = give_last_created(var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_0006)
@@ -132,17 +136,17 @@ function utility_forge_0419(eventid, objectref)
                 var_0009 = execute_usecode_array(8520, var_0008)
                 var_0009 = execute_usecode_array(1699, {17493, 7724}, objectref)
             else
-                set_object_frame(16, var_0006)
+                set_object_frame(var_0006, 16)
                 if not get_flag(795) or not get_flag(796) or not get_flag(806) then
-                    set_schedule_type(11, var_0006)
+                    set_schedule_type(var_0006, 11)
                 else
-                    set_schedule_type(15, var_0006)
+                    set_schedule_type(var_0006, 15)
                 end
-                set_item_flag(18, var_0006)
+                set_item_flag(var_0006, 18)
                 var_0012 = create_new_object(797)
-                set_item_flag(18, var_0012)
-                var_0009 = set_object_quality(244, var_0012)
-                set_object_frame(4, var_0012)
+                set_item_flag(var_0012, 18)
+                var_0009 = set_object_quality(var_0012, 244)
+                set_object_frame(var_0012, 4)
                 var_0009 = give_last_created(var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_0012)
                 var_0009 = execute_usecode_array(2, {7769}, var_0006)
@@ -198,14 +202,14 @@ function utility_forge_0419(eventid, objectref)
                 var_0009 = execute_usecode_array(8520, var_0008)
                 var_0009 = execute_usecode_array(1699, {17493, 7724}, objectref)
             else
-                set_object_frame(0, var_0006)
-                set_item_flag(18, var_0006)
+                set_object_frame(var_0006, 0)
+                set_item_flag(var_0006, 18)
                 var_001D = execute_usecode_array(var_001A or 0, {7769}, var_0006)
                 set_alignment(2, var_0006)
                 var_0012 = create_new_object(797)
-                set_item_flag(18, var_0012)
-                var_0009 = set_object_quality(var_0019, var_0012)
-                set_object_frame(4, var_0012)
+                set_item_flag(var_0012, 18)
+                var_0009 = set_object_quality(var_0012, var_0019)
+                set_object_frame(var_0012, 4)
                 var_0009 = give_last_created(var_0006)
                 var_000C = delayed_execute_usecode_array(3, 1783, {17493, 17443, 7724}, var_0012)
             end

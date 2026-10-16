@@ -1495,7 +1495,8 @@ void MainState::HandleLeftSingleClick()
 		// F10 path debug: sticky-select this NPC's current waypoint path.
 		if (m_showPathfindingDebug &&
 			(g_objectUnderMousePointer->m_UnitType == U7Object::UnitTypes::UNIT_TYPE_NPC ||
-			 g_objectUnderMousePointer->m_UnitType == U7Object::UnitTypes::UNIT_TYPE_MONSTER))
+			 g_objectUnderMousePointer->m_UnitType == U7Object::UnitTypes::UNIT_TYPE_MONSTER ||
+			 g_objectUnderMousePointer->m_usecodeObjectSchedule))
 		{
 			const int newId = g_objectUnderMousePointer->m_ID;
 			if (m_pathDebugNpcObjectId != newId && g_pathfindingSystem)
@@ -1618,8 +1619,11 @@ void MainState::HandleAvatarMovement()
 		return;
 
 	// Pose scripts (stumble, cast, item anim) own the Avatar until they finish.
+	// Item flag 16 is the polymorph marker: shape 854 is standing on this tile
+	// until usecode 1693 removes it, so walking off would leave that copy behind.
 	// Keyboard and click-to-move wait. Ordinary Lua scripts do not set this.
-	if (avatarCheck && avatarCheck->IsInUsecodeScript())
+	const bool transformHold = avatarCheck && (avatarCheck->m_flags & (1u << 16)) != 0;
+	if (avatarCheck && (avatarCheck->IsInUsecodeScript() || transformHold))
 	{
 		avatarCheck->m_pathWaypoints.clear();
 		avatarCheck->m_currentWaypointIndex = 0;
@@ -1731,8 +1735,8 @@ void MainState::KeepAvatarWalkAnimIfSteering()
 	if (!IsCameraLockedToAvatar() || !g_Player)
 		return;
 	U7Object* avatar = g_Player->GetAvatarObject();
-	// Do not reassert the walk flag while a pose script owns the body.
-	if (!avatar || avatar->IsInUsecodeScript())
+	// Do not reassert the walk flag while a pose script or the polymorph marker owns the body.
+	if (!avatar || avatar->IsInUsecodeScript() || (avatar->m_flags & (1u << 16)) != 0)
 		return;
 
 	const bool steering =
