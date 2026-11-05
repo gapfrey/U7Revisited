@@ -444,6 +444,16 @@ extern std::vector<MonsterData> g_monsterData;   // Base stats for all 65 monste
 // True if shape has a MONSTERS.DAT record (walkers spawned by usecode: mage, golem, dragon).
 bool IsMonsterShape(int shape);
 
+// Billboard orientation profile for FP tilt (whitelist — not IsMonsterShape).
+enum class BillboardProfile
+{
+	Default = 0,
+	Creature,        // FP: flipped sectors +90, raw sides -90
+	FlyingCreature   // reserved; unused
+};
+
+BillboardProfile GetBillboardProfile(int shape);
+
 // Per-shape "can pick up / drag into inventory" (not the same as UnitType).
 // Doors and other fixtures are often 0 here but still UNIT_TYPE_OBJECT if usable.
 extern std::array<int, 1024> g_isObjectMoveable;

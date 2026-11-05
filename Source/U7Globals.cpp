@@ -124,6 +124,19 @@ bool IsMonsterShape(int shape)
 	return false;
 }
 
+BillboardProfile GetBillboardProfile(int shape)
+{
+	switch (shape)
+	{
+	case 500: // cow
+	case 496: // dog
+	case 537: // wolf
+		return BillboardProfile::Creature;
+	default:
+		return BillboardProfile::Default;
+	}
+}
+
 // Spell system data
 std::vector<ReagentData> g_reagentData;
 std::vector<SpellCircle> g_spellCircles;

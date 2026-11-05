@@ -2841,6 +2841,19 @@ void U7Object::DrawWalkBillboard(const std::vector<std::vector<Texture*>>& walkT
 		}
 	}
 
+	// Creature FP: flipped-art sectors (2/3/6/7) +90; raw-art sides (0/1/4/5) -90.
+	// Same sign on both groups flips one group belly-up. Whitelist + FP only.
+	if (g_firstPersonEnabled && !drawingUprightSheet
+		&& GetBillboardProfile(m_ObjectType) == BillboardProfile::Creature
+		&& !ShouldLieFlat() && !IsSleepingPose() && !IsDeathStatus())
+	{
+		if (finalAngle == 2 || finalAngle == 3
+			|| finalAngle == 6 || finalAngle == 7)
+			billboardAngle = 90.0f;
+		else
+			billboardAngle = -90.0f; // 0,1,4,5
+	}
+
 	// U7 shape frames: 8 pixels = 1 tile. Replacement sheets are upright art at
 	// arbitrary resolution — scale to a fixed 4-tile character height instead.
 	Vector3 dims;
